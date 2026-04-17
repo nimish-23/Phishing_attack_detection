@@ -1,65 +1,69 @@
 # Phishing Attack Detection System
 
-> ⚠️ **PROTOTYPE PHASE** ⚠️  
-> *This project is currently under active development. The pipeline is functional, but Machine Learning scoring integration and the frontend Web UI are placeholders/WIP.*
+**Note: Prototype Phase**
+This project is currently under active development. The core pipeline is functional, but the machine learning scoring integration and the web-based user interface remain as placeholders pending completion.
 
-A real-time email defense system that monitors your inbox, evaluates incoming emails for phishing threats using a Machine Learning pipeline, and automatically quarantines detected attacks.
+## System Overview
 
-## 🚀 How it Works
+This application provides real-time email monitoring and automated quarantine routing. The system evaluates incoming emails for phishing threats and isolates flagged messages.
 
-The system runs completely in the background via a persistent IMAP connection. Its lifecycle consists of:
-1. **Live Monitoring (`listener`)**: Stays connected to your Gmail account in zero-overhead IDLE mode, instantly detecting when a new email hits your inbox.
-2. **Extraction (`processor`)**: Scrapes the incoming email to retrieve sender metadata, cleanses the text body, and parses all URLs/domains inside the email.
-3. **Evaluation (`ML scoring`)**: Passes the sanitized payload into a Machine Learning confidence scoring function to evaluate phishing risk. 
-4. **Quarantine (`action`)**: If the overall confidence score exceeds 75% or triggers manual test flags, it automatically intercepts the email and removes it from your main inbox, safely quarantining it in a dedicated "Phishing" folder on your mail server.
+### Pipeline Architecture
 
-## 📁 Project Structure
+1. **Listener:** Maintains a continuous IMAP IDLE connection to monitor a designated inbox for incoming messages.
+2. **Processor:** Extracts sender metadata, sanitizes the message body, and parses embedded URLs and domains.
+3. **Scoring Engine:** Feeds sanitized email data into a scoring function to determine the probability of a phishing attack.
+4. **Quarantine Execution:** Automatically routes emails that exceed the target confidence threshold (or trigger manual evaluation flags) to a designated isolation folder on the mail server.
+
+## Project Structure
 
 ```text
 Phishing_attack_detection/
 ├── backend/
-│   ├── main.py                # App entrypoint & continuous launcher
+│   ├── main.py                # Main application entry point
 │   └── service/
-│       ├── listener.py        # Real-time event monitor (IMAP IDLE)
-│       ├── receive_mail.py    # Payload extraction, AI decision logic, and Quarantine execution
-│       └── q_email.py         # Testing script (run a batch check manually)
-├── frontend/                  # Future Web UI integration
+│       ├── listener.py        # IMAP IDLE event monitor
+│       ├── receive_mail.py    # Payload extraction and quarantine logic
+│       └── q_email.py         # Batch testing script
+├── frontend/                  # Web UI directory (pending implementation)
 ├── .gitignore
-└── .env                       # Secrets (Requires valid credentials!)
+├── requirements.txt
+└── .env.example               # Environment configuration template
 ```
 
-## ⚙️ Setup & Installation
+## Setup Instructions
 
-**1. Create a `.env` file** in the root directory and add the following keys for authentication:
+**1. Environment Configuration**
+Create a `.env` file in the root directory using `.env.example` as a template:
 ```ini
-GMAIL_PASS_KEY="your-google-app-password-here"
+GMAIL_PASS_KEY="your-google-app-password"
 ```
-*(Because this script bypasses traditional web login, you must generate an "App Password" from your Google Account Security Dashboard).*
+*Note: A Google App Password securely generated from your Google Account settings is required to authenticate the IMAP connection.*
 
-**2. Activate your Virtual Environment:**
+**2. Virtual Environment Initialization**
 ```bash
 # Windows
 .\venv\Scripts\activate
 ```
 
-**3. Install Dependencies:**  
-Make sure you have installed the required libraries locally:
+**3. Dependency Installation**
 ```bash
-pip install imapclient beautifulsoup4 python-dotenv
+pip install -r requirements.txt
 ```
 
-## ▶️ Running the Application
+## Usage
 
-To start the real-time background protection, navigate to the `backend` folder and run the `main.py` entrypoint:
+Navigate to the `backend` directory and execute the main application entry point to initiate the listener service:
 
 ```bash
 cd backend
 python main.py
 ```
-This will establish an incredibly lightweight, continuous connection to your inbox. Use `Ctrl+C` to gracefully shut down the listener.
+*Note for Evaluators: Executing `main.py` automatically initializes the real-time monitoring routines defined in `listener.py`.*
 
-## 🧪 Current Testing Workflows
+To gracefully terminate the listener process, input `Ctrl+C` in the terminal.
 
-The current detection logic has two streams you can use during testing:
-- **ML Scoring Function Prototype**: Ready to accept your trained model scoring (defaults to 0.0).
-- **Manual Flagging**: A simple text override that trips an alarm if the exact word `"phishing"` is placed in an email's subject line.
+## Validation and Testing
+
+The detection environment currently supports two evaluation workflows:
+- **Keyword Override (Active):** A manual test flag that automatically routes any email containing the exact word "phishing" in the subject line to the quarantine folder.
+- **ML Integration (Pending):** The `get_phishing_score()` function is provisioned as an architectural placeholder to accept integration with trained classification models. It currently defaults to a benign baseline execution score for integration testing purposes.

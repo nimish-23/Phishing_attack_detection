@@ -4,7 +4,7 @@ import time
 from dotenv import load_dotenv
 import os
 
-# 👇 import your processor
+# Import processor
 from receive_mail import handle_email  
 
 load_dotenv()
@@ -33,7 +33,7 @@ def start_idle_listener():
 
         while True:
             try:
-                # 💤 Start IDLE mode
+                # Start IDLE mode
                 client.idle()
                 responses = client.idle_check(timeout=5)
 
@@ -46,7 +46,7 @@ def start_idle_listener():
 
                 client.idle_done()
 
-                # 🔁 fallback check (important)
+                # Fallback check
                 uids = client.search(['ALL'])
                 if not uids:
                     continue
@@ -64,10 +64,10 @@ def start_idle_listener():
                         raw_message[latest_id][b'RFC822']
                     )
 
-                    # 🔥 send to processor
+                    # Send to processor
                     handle_email(client, latest_id, msg)
                     
-                    # ✅ update AFTER successful processor to avoid skipping on failure
+                    # Update after successful processing to avoid skipping on failure
                     last_seen_id = latest_id
 
             except Exception as e:

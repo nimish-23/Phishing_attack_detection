@@ -22,7 +22,7 @@ with IMAPClient(HOST, ssl=True) as client:
 
     ensure_folder(client, "Phishing")
 
-    # ✅ limit emails for safety
+    # Limit emails for safety
     uids = client.search(['UNSEEN'])[:5]
 
     if not uids:
@@ -33,10 +33,10 @@ with IMAPClient(HOST, ssl=True) as client:
         for uid, msg_data in messages.items():
             raw_email = msg_data[b'RFC822']
 
-            # 📩 parse email
+            # Parse email
             msg = email.message_from_bytes(raw_email)
 
             print(f"\n[FETCHED] UID {uid}")
 
-            # 🔥 PASS TO SECOND FILE (MAIN CHANGE)
+            # Pass to processor
             handle_email(client, uid, msg)

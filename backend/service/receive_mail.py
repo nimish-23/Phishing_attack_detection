@@ -6,7 +6,7 @@ from email.header import decode_header
 from urllib.parse import urlparse
 from collections import Counter
 
-# 🔒 SAFETY MODE
+# SAFETY MODE
 DRY_RUN = False
 
 
@@ -156,31 +156,31 @@ def move_to_phishing(client, uid):
     def perform_move():
         try:
             client.move(uid, "Phishing")
-            print(f"✅ [SUCCESS] Moved UID {uid} to Phishing folder.")
+            print(f"[SUCCESS] Moved UID {uid} to Phishing folder.")
             return True
         except:
             try:
                 client.copy(uid, "Phishing")
                 client.delete_messages(uid)
                 client.expunge()
-                print(f"✅ [SUCCESS] Copied UID {uid} to Phishing folder and deleted original.")
+                print(f"[SUCCESS] Copied UID {uid} to Phishing folder and deleted original.")
                 return True
             except Exception as e:
                 return e
 
     result = perform_move()
     if result is not True:
-        print(f"⚠️ [WARN] Phishing folder missing. Creating it now...")
+        print(f"[WARN] Phishing folder missing. Creating it now...")
         try:
             client.create_folder("Phishing")
-            print(f"✅ [SUCCESS] Phishing folder successfully created.")
+            print(f"[SUCCESS] Phishing folder successfully created.")
             
             # Retry move
             retry_result = perform_move()
             if retry_result is not True:
-                 print(f"❌ [ERROR] Could not move email even after creating folder: {retry_result}")
+                 print(f"[ERROR] Could not move email even after creating folder: {retry_result}")
         except Exception as create_err:
-            print(f"❌ [ERROR] Failed to create Phishing folder dynamically: {create_err}")
+            print(f"[ERROR] Failed to create Phishing folder dynamically: {create_err}")
 
 
 # ================= SCORING MODEL =================
@@ -208,22 +208,22 @@ def handle_email(client, uid, msg):
     print(f"Subject: {subject}")
     print(f"Sender: {sender}")
 
-    # 🎯 1. SIMPLE TESTING (Keyword override)
+    # 1. Simple keyword override for testing
     is_test_phishing = "phishing" in subject.lower()
 
-    # 🤖 2. AI SCORING DECISION
+    # 2. ML Scoring Decision
     confidence_score = get_phishing_score(email_data)
     print(f"Phishing Confidence Score: {confidence_score:.2f}")
 
     # DECISION EVALUATION
     if is_test_phishing:
-        print("⚠️ MATCH (Simple Test Keyword) → moving to Phishing")
+        print("[MATCH] Keyword override found -> moving to Phishing")
         move_to_phishing(client, uid)
     elif confidence_score > 0.75:
-        print("⚠️ HIGH RISK (ML Score > 0.75) → moving to Phishing")
+        print("[HIGH RISK] Score > 0.75 -> moving to Phishing")
         move_to_phishing(client, uid)
     else:
-        print("✅ Safe email (No keyword & Score <= 0.75)")
+        print("[SAFE] Email is safe (No keyword & Score <= 0.75)")
 
     print("\n[DATA]")
     print("=" * 60)
