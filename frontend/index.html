@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phishing Attack Detector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- HEADER -->
+  <header class="header">
+    <p class="header-eyebrow">&#9632; real-time email threat monitor</p>
+    <h1 class="header-title">PHISHING<br><span>DETECTOR</span></h1>
+    <p class="header-sub">IMAP IDLE listener &nbsp;/&nbsp; automated quarantine routing &nbsp;/&nbsp; phishing scoring engine</p>
+    <div class="header-divider"></div>
+  </header>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar" id="statusBar">
+    <div class="status-dot" id="statusDot"></div>
+    <p class="status-text" id="statusText">Service <strong>offline</strong> — enter credentials and apply to begin</p>
+    <span class="status-badge" id="statusBadge">inactive</span>
+  </div>
+
+  <!-- PIPELINE STEPS -->
+  <div class="pipeline" id="pipeline">
+    <div class="pipe-step" id="pipe1">
+      <div class="pipe-num">01</div>
+      <div class="pipe-name">Listener</div>
+    </div>
+    <div class="pipe-step" id="pipe2">
+      <div class="pipe-num">02</div>
+      <div class="pipe-name">Processor</div>
+    </div>
+    <div class="pipe-step" id="pipe3">
+      <div class="pipe-num">03</div>
+      <div class="pipe-name">Scoring</div>
+    </div>
+    <div class="pipe-step" id="pipe4">
+      <div class="pipe-num">04</div>
+      <div class="pipe-name">Quarantine</div>
+    </div>
+  </div>
+
+  <!-- CREDENTIALS CARD -->
+  <div class="card" style="animation-delay:0.1s">
+    <p class="card-label">Gmail credentials</p>
+
+    <div class="field">
+      <div class="field-label">
+        <span>Gmail address</span>
+        <span class="field-hint">IMAP target inbox</span>
+      </div>
+      <input type="email" id="emailInput" placeholder="you@gmail.com" autocomplete="off" oninput="onInputChange()" />
+      <p class="field-error" id="emailError">invalid email address</p>
+    </div>
+
+    <div class="field">
+      <div class="field-label">
+        <span>App password</span>
+        <span class="field-hint">
+          <a href="https://myaccount.google.com/apppasswords" target="_blank"
+             style="color:var(--accent2); text-decoration:none;">
+            myaccount.google.com/apppasswords &#8599;
+          </a>
+        </span>
+      </div>
+      <div class="input-wrap">
+        <input type="password" id="passInput" class="pass-input"
+               placeholder="xxxx xxxx xxxx xxxx" maxlength="19"
+               oninput="formatPass(this)" />
+        <button class="eye-btn" id="eyeBtn" onclick="togglePass()">SHOW</button>
+      </div>
+      <p class="field-error" id="passError">must be 16 characters (spaces ignored)</p>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-apply" id="applyBtn" onclick="applyCredentials()">
+        &#9654;&nbsp; apply credentials
+      </button>
+      <button class="btn btn-clear" onclick="clearAll()">clear</button>
+    </div>
+  </div>
+
+  <!-- SERVICE TOGGLE CARD -->
+  <div class="card" style="animation-delay:0.2s">
+    <p class="card-label">IMAP listener service</p>
+
+    <div class="service-row">
+      <div class="service-info">
+        <h3>IDLE MONITOR</h3>
+        <p id="serviceDesc">Disabled — apply credentials first to unlock</p>
+      </div>
+      <label class="toggle-wrap" id="toggleWrap">
+        <input type="checkbox" id="serviceToggle" disabled onchange="handleToggle(this.checked)" />
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- ACTIVITY LOG -->
+  <div class="card" style="animation-delay:0.3s">
+    <p class="card-label">activity log</p>
+    <div class="log-wrap">
+      <div class="log-header">
+        <span class="log-header-label">&#9670; stdout stream</span>
+        <span class="log-count" id="logCount">0 events</span>
+      </div>
+      <div class="log-body" id="logBody">
+        <!-- entries injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p class="footer-left">Phishing_attack_detection &nbsp;/&nbsp; <span>prototype</span></p>
+    <p class="footer-right">backend &middot; service &middot; listener.py</p>
+  </footer>
+
+</div>
+
+<script src="/static/script.js"></script>
+
+</body>
+</html>

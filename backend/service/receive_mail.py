@@ -148,39 +148,42 @@ def process_email(msg):
 
 # ================= ACTION =================
 
-def move_to_phishing(client, uid):
+def move_to_phishing(client, uid, log=None):
+    if log is None:
+        log = lambda level, msg: print(msg)
+
     if DRY_RUN:
-        print(f"[DRY RUN] Would move UID {uid} to Phishing")
+        log("warn", f"[DRY RUN] Would move UID {uid} to Phishing")
         return
 
     def perform_move():
         try:
             client.move(uid, "Phishing")
-            print(f"[SUCCESS] Moved UID {uid} to Phishing folder.")
+            log("success", f"[SUCCESS] Moved UID {uid} to Phishing folder.")
             return True
         except:
             try:
                 client.copy(uid, "Phishing")
                 client.delete_messages(uid)
                 client.expunge()
-                print(f"[SUCCESS] Copied UID {uid} to Phishing folder and deleted original.")
+                log("success", f"[SUCCESS] Copied UID {uid} to Phishing folder and deleted original.")
                 return True
             except Exception as e:
                 return e
 
     result = perform_move()
     if result is not True:
-        print(f"[WARN] Phishing folder missing. Creating it now...")
+        log("warn", f"[WARN] Phishing folder missing. Creating it now...")
         try:
             client.create_folder("Phishing")
-            print(f"[SUCCESS] Phishing folder successfully created.")
+            log("success", f"[SUCCESS] Phishing folder successfully created.")
             
             # Retry move
             retry_result = perform_move()
             if retry_result is not True:
-                 print(f"[ERROR] Could not move email even after creating folder: {retry_result}")
+                 log("error", f"[ERROR] Could not move email even after creating folder: {retry_result}")
         except Exception as create_err:
-            print(f"[ERROR] Failed to create Phishing folder dynamically: {create_err}")
+            log("error", f"[ERROR] Failed to create Phishing folder dynamically: {create_err}")
 
 
 # ================= SCORING MODEL =================
@@ -196,36 +199,38 @@ def get_phishing_score(email_data):
 
 # ================= MAIN HANDLER =================
 
-def handle_email(client, uid, msg):
-    print("\n[PROCESSING] Processing email...")
+def handle_email(client, uid, msg, log_callback=None):
+    if log_callback is None:
+        log = lambda level, msg: print(msg)
+    else:
+        log = log_callback
+
+    log("info", "[PROCESSING] Processing email...")
 
     email_data = process_email(msg)
 
     subject = email_data["metadata"]["subject"]
     sender = email_data["metadata"]["sender"]
 
-    print(f"UID: {uid}")
-    print(f"Subject: {subject}")
-    print(f"Sender: {sender}")
+    log("info", f"UID: {uid}")
+    log("info", f"Subject: {subject}")
+    log("info", f"Sender: {sender}")
 
     # 1. Simple keyword override for testing
     is_test_phishing = "phishing" in subject.lower()
 
     # 2. ML Scoring Decision
     confidence_score = get_phishing_score(email_data)
-    print(f"Phishing Confidence Score: {confidence_score:.2f}")
+    log("info", f"Phishing Confidence Score: {confidence_score:.2f}")
 
     # DECISION EVALUATION
     if is_test_phishing:
-        print("[MATCH] Keyword override found -> moving to Phishing")
-        move_to_phishing(client, uid)
+        log("warn", "[MATCH] Keyword override found -> moving to Phishing")
+        move_to_phishing(client, uid, log)
     elif confidence_score > 0.75:
-        print("[HIGH RISK] Score > 0.75 -> moving to Phishing")
-        move_to_phishing(client, uid)
+        log("error", "[HIGH RISK] Score > 0.75 -> moving to Phishing")
+        move_to_phishing(client, uid, log)
     else:
-        print("[SAFE] Email is safe (No keyword & Score <= 0.75)")
+        log("success", "[SAFE] Email is safe (No keyword & Score <= 0.75)")
 
-    print("\n[DATA]")
-    print("=" * 60)
-    print(json.dumps(email_data, indent=4))
-    print("=" * 60)
+    log("info", f"[DATA] Links: {email_data['links']['count']}, Domains: {email_data['links']['domains']}")
